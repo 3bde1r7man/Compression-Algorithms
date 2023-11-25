@@ -84,7 +84,7 @@ public class CompressionGUI {
                 }else if(algorithm.equals("Huffman")){
                     Huffman huffman = new Huffman();
                     if (isCompress) {
-                        huffman.compress(inputFilePath, "src/compressed.txt");
+                        huffman.compress(inputFilePath, "src/compressed.bin");
                         statusLabel.setText("Compression completed successfully.");
                     } else {
                         huffman.decompress(inputFilePath, "src/decompressed.txt");
