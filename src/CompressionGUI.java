@@ -23,7 +23,7 @@ public class CompressionGUI {
         frame.setLayout(new GridLayout(6, 2));
 
         inputFilePathField = new JTextField();
-        algorithmComboBox = new JComboBox<>(new String[]{"LZW", "LZ77"});
+        algorithmComboBox = new JComboBox<>(new String[]{"LZW", "LZ77", "Huffman"});
         compressRadioButton = new JRadioButton("Compress");
         decompressRadioButton = new JRadioButton("Decompress");
         ButtonGroup group = new ButtonGroup();
@@ -78,6 +78,16 @@ public class CompressionGUI {
                         statusLabel.setText("Compression completed successfully.");
                     } else {
                         lzw.decompress(inputFilePath, "src/decompressed.txt");
+                        statusLabel.setText("Decompression completed successfully.");
+                    }
+                    return;
+                }else if(algorithm.equals("Huffman")){
+                    Huffman huffman = new Huffman();
+                    if (isCompress) {
+                        huffman.compress(inputFilePath, "src/compressed.txt");
+                        statusLabel.setText("Compression completed successfully.");
+                    } else {
+                        huffman.decompress(inputFilePath, "src/decompressed.txt");
                         statusLabel.setText("Decompression completed successfully.");
                     }
                     return;
