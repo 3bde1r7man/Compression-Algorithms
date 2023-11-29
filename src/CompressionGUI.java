@@ -23,7 +23,7 @@ public class CompressionGUI {
         frame.setLayout(new GridLayout(6, 2));
 
         inputFilePathField = new JTextField();
-        algorithmComboBox = new JComboBox<>(new String[]{"LZW", "LZ77", "Huffman"});
+        algorithmComboBox = new JComboBox<>(new String[]{"LZW", "LZ77", "Huffman", "Vector Quantization"});
         compressRadioButton = new JRadioButton("Compress");
         decompressRadioButton = new JRadioButton("Decompress");
         ButtonGroup group = new ButtonGroup();
@@ -88,6 +88,16 @@ public class CompressionGUI {
                         statusLabel.setText("Compression completed successfully.");
                     } else {
                         huffman.decompress(inputFilePath, "src/decompressed.txt");
+                        statusLabel.setText("Decompression completed successfully.");
+                    }
+                    return;
+                } else if(algorithm.equals("Vector Quantization")){
+                    Quantiz quantiz = new Quantiz();
+                    if (isCompress) {
+                        quantiz.compress(inputFilePath, "src/compressed.bin");
+                        statusLabel.setText("Compression completed successfully.");
+                    } else {
+                        quantiz.decompress(inputFilePath, "src/decompressed.txt");
                         statusLabel.setText("Decompression completed successfully.");
                     }
                     return;

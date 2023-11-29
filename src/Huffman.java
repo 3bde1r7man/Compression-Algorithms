@@ -21,9 +21,6 @@ public class Huffman {
                 frequencies.put(current, 1);
             }
         }
-        for (char c : frequencies.keySet()) {
-            System.out.println(c + " " + frequencies.get(c));
-        }
     }
 
     void buildTree(){
