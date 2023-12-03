@@ -92,9 +92,9 @@ public class CompressionGUI {
                     }
                     return;
                 } else if(algorithm.equals("Vector Quantization")){
-                    Quantiz quantiz = new Quantiz();
+                    VectorQuantiz quantiz = new VectorQuantiz();
                     if (isCompress) {
-                        quantiz.compress(inputFilePath, "src/compressed.bin");
+                        quantiz.compress(inputFilePath, "src/compressed.bin", 4, 2);
                         statusLabel.setText("Compression completed successfully.");
                     } else {
                         quantiz.decompress(inputFilePath, "src/decompressed.txt");
