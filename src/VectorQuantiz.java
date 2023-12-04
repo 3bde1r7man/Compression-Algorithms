@@ -49,8 +49,8 @@ public class VectorQuantiz {
     }
     void generateCodebookM(int vectorSize) {
         double sum = 0;
-        int total = (img.length / vectorSize) * (img.length / vectorSize);
-        double[][] vector = new double[vectorSize][vectorSize];
+        
+        
         ArrayList<int[][]> nearestVectors = new ArrayList<>();
         int size = codebook.size();
         for (int i = 0; i <= size - i; i++) {
@@ -59,12 +59,13 @@ public class VectorQuantiz {
                     nearestVectors.add(vectors.get(m));
                 }
             }
+            double[][] vector = new double[vectorSize][vectorSize];
             for(int j = 0; j < vectorSize; j++){
                 for(int k = 0; k < vectorSize; k++){
                     for(int l = 0; l < nearestVectors.size(); l++){
                         sum += nearestVectors.get(l)[j][k];
                     }
-                    vector[j][k] = sum / total;
+                    vector[j][k] = sum / nearestVectors.size();
                     sum = 0;
                 }
             }
@@ -75,10 +76,11 @@ public class VectorQuantiz {
     }
 
     void codebookSplit(int vectorSize){
-        double[][] vector1 = new double[vectorSize][vectorSize];
-        double[][] vector2 = new double[vectorSize][vectorSize];
+        
         int size = codebook.size();
         for (int i = 0; i <= size - i; i++) {
+            double[][] vector1 = new double[vectorSize][vectorSize];
+            double[][] vector2 = new double[vectorSize][vectorSize];
             for (int j = 0; j < vectorSize; j++) {
                 for (int k = 0; k < vectorSize; k++) {
                     vector1[j][k] =  Math.floor(codebook.get(0)[j][k]);
@@ -93,36 +95,57 @@ public class VectorQuantiz {
 
     void nearestVector(int vectorSize){
         ArrayList<Double> distance = new ArrayList<>();
-        double sum = 0;
-        for (int i = 0; i < codebook.size(); i++) {
-            for (int j = 0; j < vectorSize; j++) {
-                for (int k = 0; k < vectorSize; k++) {
-                    sum += codebook.get(i)[j][k];
-                }
-            }
-            distance.add(sum);
-            sum = 0;
-        }
+        // double sum = 0;
+        // for (int i = 0; i < codebook.size(); i++) {
+        //     for (int j = 0; j < vectorSize; j++) {
+        //         for (int k = 0; k < vectorSize; k++) {
+        //             sum += codebook.get(i)[j][k];
+        //         }
+        //     }
+        //     distance.add(sum);
+        //     sum = 0;
+        // }
 
+        // for (int i = 0; i < vectors.size(); i++) {
+        //     for (int j = 0; j < vectorSize; j++) {
+        //         for (int k = 0; k < vectorSize; k++) {
+        //             sum += vectors.get(i)[j][k];
+        //         }
+        //     }
+        //     double min = Math.abs(sum - distance.get(0));
+        //     int index = 0;
+        //     for (int j = 1; j < distance.size(); j++) {
+        //         if(Math.abs(sum - distance.get(j)) < min){
+        //             min = Math.abs(sum - distance.get(j));
+        //             index = j;
+        //         }
+        //     }
+        //     sum = 0;
+        //     codebookMap.put(i, index);
+        // }    
+        
         for (int i = 0; i < vectors.size(); i++) {
-            
-            for (int j = 0; j < vectorSize; j++) {
+            for (int j = 0; j < codebook.size(); j++) {
+                double sum = 0;
                 for (int k = 0; k < vectorSize; k++) {
-                    sum += vectors.get(i)[j][k];
+                    for (int l = 0; l < vectorSize; l++) {
+                        sum += Math.abs(vectors.get(i)[k][l] - codebook.get(j)[k][l]);
+                    }
                 }
+                distance.add(sum);
+                sum = 0;
             }
-            double min = Math.abs(sum - distance.get(0));
+            double min = distance.get(0);
             int index = 0;
             for (int j = 1; j < distance.size(); j++) {
-                if(Math.abs(sum - distance.get(j)) < min){
-                    min = Math.abs(sum - distance.get(j));
+                if(distance.get(j) < min){
+                    min = distance.get(j);
                     index = j;
                 }
             }
-            sum = 0;
+            distance.clear();
             codebookMap.put(i, index);
         }
-
     }
 
 
@@ -170,6 +193,14 @@ public class VectorQuantiz {
             }
             i++;
         }
+        reader.close();
+    }
+
+    String fixCodeBook(int codebook, String code){
+        while (code.length() < Math.log(codebook)) {
+            code = "0" + code;
+        }
+        return code;
     }
     public void compress(String inputFilePath, String outputFilePath, int Codebook, int vectorSize) {
         try {
@@ -200,11 +231,15 @@ public class VectorQuantiz {
             }
             
             for(int i = 0; i < codebook.size(); i++){
-                binaryCode.put(i, Integer.toBinaryString(i));
+                String code = Integer.toBinaryString(i);
+                code = fixCodeBook(codebook.size(), code);
+                binaryCode.put(i, code);
             }
 
             String binary = "";
-            
+            BufferedWriter wr = new BufferedWriter(new FileWriter(outputFilePath));
+            wr.write("");
+            wr.close();
             for (int i = 0; i < vectors.size(); i++) {
                 binary += binaryCode.get(codebookMap.get(i));
                 if((i + 1) % (img.length / vectorSize) == 0){
