@@ -97,7 +97,7 @@ class Quantizer {
 		return values;
 	}
 
-	public static void decompress(String inPath, String outPath) throws IOException, ClassNotFoundException {
+	public static void decompress(String outPath) throws IOException, ClassNotFoundException {
 
 		FileInputStream fis = new FileInputStream("Codebook.txt");
 		ObjectInputStream in = new ObjectInputStream(fis);
