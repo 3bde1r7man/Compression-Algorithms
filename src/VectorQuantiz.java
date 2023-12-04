@@ -102,7 +102,7 @@ public class VectorQuantiz {
     void codebookSplit(int vectorSize){
         
         int size = codebook.size();
-        for (int i = 0; i <= size - i; i++) {
+        for (int i = 0; i < size; i++) {
             double[][] vector1 = new double[vectorSize][vectorSize];
             double[][] vector2 = new double[vectorSize][vectorSize];
             for (int j = 0; j < vectorSize; j++) {
@@ -227,6 +227,7 @@ public class VectorQuantiz {
         try {
             
             img = readImage(inputFilePath);
+            //getimg(inputFilePath);
             for (int i = 0; i < img.length; i+= vectorSize) {
                 for (int j = 0; j < img.length; j+= vectorSize) {
                     int[][] vector = new int[vectorSize][vectorSize];
@@ -239,7 +240,7 @@ public class VectorQuantiz {
                 }
             }
             boolean flag = true;
-            for (int i = 0; i <= Math.log(Codebook); i++) {
+            for (int i = 0; i < (Math.log(Codebook) / Math.log(2)); i++) {
                 if(flag){
                     generateCodebookA(vectorSize);
                     flag = false;
@@ -260,6 +261,8 @@ public class VectorQuantiz {
             String binary = "";
             FileOutputStream wr = new FileOutputStream(outputFilePath);
             wr.write((img.length / vectorSize));
+            wr.write(' ');
+            wr.write((img.length / 8));
             wr.write('\n');
             wr.close();
             for (int i = 0; i < vectors.size(); i++) {
@@ -296,25 +299,22 @@ public class VectorQuantiz {
         ArrayList<String> commpressedStream = new ArrayList<>();
         FileInputStream reader = new FileInputStream(inputFilePath);
         int size = reader.read();
+        int len = reader.read();
         for (int i = 0; i < size; i++) {
             commpressedStream.add("");
         }
         reader.read();
-        int addedzeros = reader.read() - '0';
         for (int i = 0; i < size; i++) {
+            int addedzeros = reader.read() - '0';
             while (reader.available() > 0) {
-                int current = reader.read();
-                if(current == '\n'){
-                    if(i == size - 1){
-                        break;
-                    }
-                    addedzeros = reader.read() - '0';
-                    break;
+                for (int j = 0; j < len; j++) {
+                    int current = reader.read();
+                    byte b = (byte) current;
+                    String code = Integer.toBinaryString(b);
+                    commpressedStream.set(i, commpressedStream.get(i) + repairBinary(code));
                 }
-                byte b = (byte) current;
-                String code = Integer.toBinaryString(b);
-                
-                commpressedStream.set(i, commpressedStream.get(i) + repairBinary(code));
+                reader.read();
+                break;
             }
             commpressedStream.set(i, commpressedStream.get(i).substring(addedzeros));
         }
@@ -384,7 +384,7 @@ public class VectorQuantiz {
                 }
                 System.out.println();
                 writer.write("\n");
-                x-= (vectorsD.size() / commpressedStream.size());
+                x -= (vectorsD.size() / commpressedStream.size());
             }
             writer.close();
         }catch(Exception e){
