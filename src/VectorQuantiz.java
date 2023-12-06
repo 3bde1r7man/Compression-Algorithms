@@ -16,7 +16,7 @@ import java.io.IOException;
 
 public class VectorQuantiz {
     ArrayList<int[][]> vectors = new ArrayList<>();
-    ArrayList<double[][]> vectorsD;
+    ArrayList<int[][]> vectorsD;
     ArrayList<double[][]> codebook = new ArrayList<>();
     HashMap<Integer, Integer> codebookMap = new HashMap<>();
     HashMap<Integer, String> binaryCode = new HashMap<>();
@@ -145,38 +145,8 @@ public class VectorQuantiz {
     }
 
 
-    void writeToFile(String path, String binary) {
-        try {
-            FileOutputStream writer = new FileOutputStream(path, true);
-            byte[] bytes = new byte[binary.length() / 8];
-            for (int i = 0; i < binary.length(); i += 8) {
-                String byteString = binary.substring(i, i + 8);
-                byte b = (byte) Integer.parseInt(byteString, 2);
-                bytes[i / 8] = b;
-            }
-            for (int i = 0; i < bytes.length; i++) {
-                writer.write(bytes[i]);
-            }
-            
-            writer.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
-    private String padBinaryString(String binaryString) {
-        
-        int remainder = binaryString.length() % 8;
-        if (remainder != 0) {
-            int padLength = 8 - remainder;
-            StringBuilder paddedBinaryString = new StringBuilder(binaryString);
-            for (int i = 0; i < padLength; i++) {
-                paddedBinaryString.insert(0, '0');
-            }
-            return paddedBinaryString.toString();
-        }
-        return binaryString;
-    }
+    
     void getimg(String path) throws Exception {
         BufferedReader reader = new BufferedReader(new FileReader(path));
         img = new int[6][6];
@@ -201,20 +171,17 @@ public class VectorQuantiz {
 
     void WriteOverHead(String outputFilePath, int vectorSize, int codebookSize){
         try{
-            FileOutputStream writer = new FileOutputStream(outputFilePath, true);
-            writer.write(codebookSize); 
+            BufferedWriter writer = new BufferedWriter(new FileWriter(outputFilePath, true));
+            writer.write(codebookSize + ""); 
             writer.write(' ');
-            writer.write(vectorSize);
+            writer.write(vectorSize + "");
             writer.write('\n');
             for (int i = 0; i < binaryCode.size(); i++) {
                 String code = binaryCode.get(i);
-
-                for (int j = 0; j < code.length(); j++) {
-                    writer.write((char)code.charAt(j));
-                }
+                writer.write(code + " ");
                 for (int j = 0; j < vectorSize; j++) {
                     for (int k = 0; k < vectorSize; k++) {
-                        writer.write((int)codebook.get(i)[j][k]);
+                        writer.write((int)codebook.get(i)[j][k] + " ");
                     }
                 }
             }
@@ -258,85 +225,44 @@ public class VectorQuantiz {
                 binaryCode.put(i, code);
             }
 
-            String binary = "";
-            FileOutputStream wr = new FileOutputStream(outputFilePath);
-            wr.write((img.length / vectorSize));
-            wr.write(' ');
-            wr.write((img.length / 8));
-            wr.write('\n');
-            wr.close();
+            BufferedWriter writer = new BufferedWriter(new FileWriter(outputFilePath));
+            writer.write((img.length / vectorSize) + "\n");
             for (int i = 0; i < vectors.size(); i++) {
-                binary += binaryCode.get(codebookMap.get(i));
-                if((i + 1) % (img.length / vectorSize) == 0){
-                    String paddedBinary = padBinaryString(binary);
-                    BufferedWriter writer = new BufferedWriter(new FileWriter(outputFilePath, true));
-                    writer.write( paddedBinary.length() - binary.length() + "");
-                    writer.close();
-                    writeToFile(outputFilePath, paddedBinary);
-                    writer = new BufferedWriter(new FileWriter(outputFilePath, true));
-                    writer.write("\n");
-                    writer.close();
-                    binary = "";
+                writer.write(binaryCode.get(codebookMap.get(i)));
+                if((i+ 1) % (vectors.size() / (img.length / vectorSize)) == 0){
+                    writer.write('\n');
                 }
             }
+            writer.close();
             WriteOverHead(outputFilePath, vectorSize, Codebook);
-
         } catch (Exception e) {
             e.printStackTrace();
         }
         
     }
-    String repairBinary(String binary){
-        while (binary.length() < 8) {
-            binary = "0" + binary;
-        }
-        while (binary.length() > 8) {
-            binary = binary.substring(binary.length() - 8);
-        }
-        return binary;
-    }
+    
     ArrayList<String> readBinaryFile(String inputFilePath) throws Exception{
         ArrayList<String> commpressedStream = new ArrayList<>();
-        FileInputStream reader = new FileInputStream(inputFilePath);
-        int size = reader.read();
-        int len = reader.read();
-        for (int i = 0; i < size; i++) {
-            commpressedStream.add("");
+        BufferedReader reader = new BufferedReader(new FileReader(inputFilePath));
+        int lines = Integer.parseInt(reader.readLine());
+        for (int i = 0; i < lines; i++) {
+            String line = reader.readLine();
+            commpressedStream.add(line);
         }
-        reader.read();
-        for (int i = 0; i < size; i++) {
-            int addedzeros = reader.read() - '0';
-            while (reader.available() > 0) {
-                for (int j = 0; j < len; j++) {
-                    int current = reader.read();
-                    byte b = (byte) current;
-                    String code = Integer.toBinaryString(b);
-                    commpressedStream.set(i, commpressedStream.get(i) + repairBinary(code));
-                }
-                reader.read();
-                break;
-            }
-            commpressedStream.set(i, commpressedStream.get(i).substring(addedzeros));
-        }
-        int codebookSize = reader.read();
-        reader.read();
-        int vectorSize = reader.read();
-        reader.read();
+        String line = reader.readLine();
+        int codebookSize = Integer.parseInt(line.split(" ")[0]);
+        int vectorSize = Integer.parseInt(line.split(" ")[1]);
+        line = reader.readLine();
+        String[] overHead = line.split(" "); 
         codebook = new ArrayList<>();
         binaryCode = new HashMap<>();
         for (int i = 0; i < codebookSize; i++) {
-            String code = "";
-            char c = '\0';
-            for (int j = 0; j < Math.log(codebookSize); j++) {
-                int current = reader.read();
-                c = (char) current;
-                code += c;
-            }
-            binaryCode.put(i, code);
             double[][] vector = new double[vectorSize][vectorSize];
+            String code = overHead[i * ((vectorSize * vectorSize) + 1)];
+            binaryCode.put(i, code);
             for (int j = 0; j < vectorSize; j++) {
                 for (int k = 0; k < vectorSize; k++) {
-                    vector[j][k] = reader.read();
+                    vector[j][k] = Integer.parseInt(overHead[(i * vectorSize * vectorSize) + (j * vectorSize) + k + 1]);
                 }
             }
             codebook.add(vector);
@@ -349,16 +275,26 @@ public class VectorQuantiz {
         try{
             HashMap<String, Integer> binMap = new HashMap<>();
             vectorsD = new ArrayList<>();
+
             ArrayList<String> commpressedStream = readBinaryFile(inputFilePath);
             for (int i = 0; i < binaryCode.size(); i++) {
                 binMap.put(binaryCode.get(i), i);
             }
             BufferedWriter writer = new BufferedWriter(new FileWriter(outputFilePath));
+            vectorsD = new ArrayList<>();
             for (int i = 0; i < commpressedStream.size(); i++) {
-                String binary = commpressedStream.get(i);
-                for (int j = 0; j < binary.length(); j += (int)(Math.log(codebook.size()) / Math.log(2))) {
-                    String code = binary.substring(j, j + (int)(Math.log(codebook.size()) / Math.log(2)));
-                    vectorsD.add(codebook.get(binMap.get(code)));
+                String line = commpressedStream.get(i);
+                int codebookSize = binaryCode.get(0).length();
+                for (int j = 0; j < line.length(); j += codebookSize) {
+                    String code = line.substring(j, j + codebookSize);
+                    int[][] vector = new int[codebook.get(0).length][codebook.get(0).length];
+                    int index = binMap.get(code);
+                    for (int k = 0; k < codebook.get(index).length; k++) {
+                        for (int l = 0; l < codebook.get(index).length; l++) {
+                            vector[k][l] = (int)codebook.get(index)[k][l];
+                        }
+                    }
+                    vectorsD.add(vector);
                 }
             }
             int vectorSize = codebook.get(0).length;
