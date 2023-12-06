@@ -92,12 +92,22 @@ public class CompressionGUI {
                     }
                     return;
                 } else if(algorithm.equals("Vector Quantization")){
-                    VectorQuantiz quantiz = new VectorQuantiz();
+                    // VectorQuantiz quantiz = new VectorQuantiz();
                     if (isCompress) {
-                        quantiz.compress(inputFilePath, "src/compressed.bin", 16, 4);
+                        try{
+                            VectorQuantization.compressImg(inputFilePath, "src/compress.jpg", 4, 2);
+                        }catch(Exception ex){
+                            ex.printStackTrace();
+                        }
+                        
                         statusLabel.setText("Compression completed successfully.");
                     } else {
-                        quantiz.decompress(inputFilePath, "src/decompressed.txt");
+                        try{
+                            VectorQuantization.decompress(inputFilePath,"src/decompressed.jpg");
+                        }catch(Exception ex){
+                            ex.printStackTrace();
+                        }
+                        
                         statusLabel.setText("Decompression completed successfully.");
                     }
                     return;
