@@ -22,11 +22,8 @@ class Quantizer {
 			int index = close(imgData.get(i), values);
 			output.add(index);
 		}
-		int x = (img.length * img[0].length) / (vectorSize * vectorSize);
-		int size = (int) Math.sqrt(x);
-		writeImage(null, output, outPath, size, size);
 
-		FileOutputStream fos = new FileOutputStream("Codebook.txt");
+		FileOutputStream fos = new FileOutputStream("compressed.bin");
 		ObjectOutputStream out = new ObjectOutputStream(fos);
 		out.writeObject(values);
 		out.writeObject(output);
@@ -97,9 +94,9 @@ class Quantizer {
 		return values;
 	}
 
-	public static void decompress(String outPath) throws IOException, ClassNotFoundException {
+	public static void decompress(String inPath,String outPath) throws IOException, ClassNotFoundException {
 
-		FileInputStream fis = new FileInputStream("Codebook.txt");
+		FileInputStream fis = new FileInputStream(inPath);
 		ObjectInputStream in = new ObjectInputStream(fis);
 		@SuppressWarnings("unchecked")
 		Vector<AverageVector> averages = (Vector<AverageVector>) in.readObject();

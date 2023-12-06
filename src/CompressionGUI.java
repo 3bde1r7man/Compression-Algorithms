@@ -103,7 +103,7 @@ public class CompressionGUI {
                         // statusLabel.setText("Compression completed successfully.");
                     } else {
                         try{
-                            Quantizer.decompress("src/decompressed.jpg");
+                            Quantizer.decompress(inputFilePath,"src/decompressed.jpg");
                         }catch(Exception ex){
                             ex.printStackTrace();
                         }
