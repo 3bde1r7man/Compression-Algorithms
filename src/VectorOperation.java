@@ -1,16 +1,16 @@
 import java.io.Serializable;
 
 // class for matrix operations
-public class AverageVector implements Serializable {
+public class VectorOperation implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private double[][] average;
 
 	
-	public AverageVector() 
+	public VectorOperation() 
 	{
 
 	}
-	public AverageVector(int size) 
+	public VectorOperation(int size) 
 	{
 		average = new double[size][size];
 		for (int i = 0; i < size; ++i) 
@@ -21,7 +21,7 @@ public class AverageVector implements Serializable {
 			}
 		}
 	}
-	public AverageVector(AverageVector another) 
+	public VectorOperation(VectorOperation another) 
 	{
 		average = new double[another.getArr().length][another.getArr()[0].length];
 		for (int i = 0; i < another.getArr().length; ++i) 
@@ -37,9 +37,9 @@ public class AverageVector implements Serializable {
 	{
 		return average;
 	}
-	public AverageVector divide(int num) 
+	public VectorOperation divide(int num) 
 	{
-		AverageVector result = new AverageVector(this.average.length);
+		VectorOperation result = new VectorOperation(this.average.length);
 		for (int i = 0; i < average.length; ++i) 
 		{
 			for (int j = 0; j < average[0].length; ++j) 
@@ -50,8 +50,8 @@ public class AverageVector implements Serializable {
 		return result;
 	}
 
-	public AverageVector plus(int[][] vec) {
-		AverageVector result = new AverageVector(this.average.length);
+	public VectorOperation plus(int[][] vec) {
+		VectorOperation result = new VectorOperation(this.average.length);
 		for (int i = 0; i < average.length; ++i)
 		{
 			for (int j = 0; j < average[0].length; ++j) 
@@ -77,8 +77,8 @@ public class AverageVector implements Serializable {
 
 	}
 
-	public AverageVector add(int num) {
-		AverageVector result = new AverageVector(this.average.length);
+	public VectorOperation add(int num) {
+		VectorOperation result = new VectorOperation(this.average.length);
 		for (int i = 0; i < average.length; ++i) {
 			for (int j = 0; j < average[0].length; ++j) {
 				result.average[i][j] = average[i][j] + num;
@@ -87,8 +87,8 @@ public class AverageVector implements Serializable {
 		return result;
 	}
 
-	public AverageVector floor() {
-		AverageVector result = new AverageVector(this.average.length);
+	public VectorOperation floor() {
+		VectorOperation result = new VectorOperation(this.average.length);
 		for (int i = 0; i < average.length; ++i) {
 			for (int j = 0; j < average[0].length; ++j) {
 				result.average[i][j] = Math.floor(average[i][j]);

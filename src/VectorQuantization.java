@@ -8,7 +8,7 @@ import java.io.ObjectOutputStream;
 import java.util.Vector;
 import javax.imageio.ImageIO;
 
-class Quantizer {
+class VectorQuantization {
 
 	// INPATH is image name.png or jpeg  
 	public static void compressImg(String inPath, String outPath, int vectorSize, int numberOfBits)
@@ -16,23 +16,23 @@ class Quantizer {
 
 		int img[][] = readImage(inPath);
 		Vector<int[][]> imgData = split(img, vectorSize);
-		Vector<AverageVector> values = qunatize(imgData, numberOfBits);
+		Vector<VectorOperation> values = qunatize(imgData, numberOfBits);
 		Vector<Integer> output = new Vector<>();
 		for (int i = 0; i < imgData.size(); ++i) {
 			int index = close(imgData.get(i), values);
 			output.add(index);
 		}
 
-		FileOutputStream fos = new FileOutputStream("compressed.bin");
+		FileOutputStream fos = new FileOutputStream("src/compressed.bin");
 		ObjectOutputStream out = new ObjectOutputStream(fos);
 		out.writeObject(values);
 		out.writeObject(output);
 		out.close();
 	}
 
-	public static AverageVector average(Vector<int[][]> data) {
+	public static VectorOperation average(Vector<int[][]> data) {
 		int size = data.get(0).length;
-		AverageVector avg = new AverageVector(size);
+		VectorOperation avg = new VectorOperation(size);
 		for (int i = 0; i < data.size(); ++i) {
 			for (int r = 0; r < size; ++r) {
 				for (int c = 0; c < size; ++c) {
@@ -43,7 +43,7 @@ class Quantizer {
 		return avg.divide(data.size());
 	}
 
-	public static int close(int[][] n, Vector<AverageVector> values) {
+	public static int close(int[][] n, Vector<VectorOperation> values) {
 
 		double c = values.get(0).distance(n);
 		int index = 0;
@@ -56,11 +56,11 @@ class Quantizer {
 		return index;
 	}
 
-	public static void associate(Vector<int[][]> data, Vector<AverageVector> averages) {
-		Vector<AverageVector> sums = new Vector<>();
+	public static void associate(Vector<int[][]> data, Vector<VectorOperation> averages) {
+		Vector<VectorOperation> sums = new Vector<>();
 		Vector<Integer> counters = new Vector<>();
 		for (int i = 0; i < averages.size(); ++i) {
-			sums.add(new AverageVector(data.get(0).length));
+			sums.add(new VectorOperation(data.get(0).length));
 			counters.add(0);
 		}
 
@@ -74,17 +74,17 @@ class Quantizer {
 		}
 	}
 
-	public static Vector<AverageVector> qunatize(Vector<int[][]> data, int numberOfBits) {
+	public static Vector<VectorOperation> qunatize(Vector<int[][]> data, int numberOfBits) {
 
-		AverageVector avg = average(data);
-		Vector<AverageVector> values = new Vector<>();
+		VectorOperation avg = average(data);
+		Vector<VectorOperation> values = new Vector<>();
 		values.add(avg);
 		while (values.size() < numberOfBits) {
 			int size = values.size();
 			for (int j = 0; j < size; ++j) {
-				AverageVector current = values.remove(0);
-				AverageVector low = current.floor();
-				AverageVector high = low.add(1);
+				VectorOperation current = values.remove(0);
+				VectorOperation low = current.floor();
+				VectorOperation high = low.add(1);
 				values.add(low);
 				values.add(high);
 			}
@@ -99,14 +99,14 @@ class Quantizer {
 		FileInputStream fis = new FileInputStream(inPath);
 		ObjectInputStream in = new ObjectInputStream(fis);
 		@SuppressWarnings("unchecked")
-		Vector<AverageVector> averages = (Vector<AverageVector>) in.readObject();
+		Vector<VectorOperation> averages = (Vector<VectorOperation>) in.readObject();
 		@SuppressWarnings("unchecked")
 		Vector<Integer> compImage = (Vector<Integer>) in.readObject();
 		in.close();
 
-		Vector<AverageVector> linearImage = new Vector<>();
+		Vector<VectorOperation> linearImage = new Vector<>();
 		for (int j = 0; j < compImage.size(); ++j) {
-			AverageVector temp = new AverageVector(averages.get(compImage.get(j)));
+			VectorOperation temp = new VectorOperation(averages.get(compImage.get(j)));
 			linearImage.add(temp);
 		}
 		int vectorSize = averages.get(0).getArr().length; //2
@@ -174,9 +174,8 @@ class Quantizer {
 		return pixels;
 	}
 
-	public static void writeImage(int[][] pixels, Vector<Integer> output, String outputFilePath, int height,
-			int width) {
-				// reverse engineer the readImage method
+	public static void writeImage(int[][] pixels, Vector<Integer> output, String outputFilePath, int height, int width) {
+		// reverse engineer the readImage method
 		if (output != null) {
 			pixels = new int[height][width];
 			for (int i = 0; i < output.size(); ++i) {
