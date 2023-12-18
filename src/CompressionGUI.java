@@ -23,7 +23,7 @@ public class CompressionGUI {
         frame.setLayout(new GridLayout(6, 2));
 
         inputFilePathField = new JTextField();
-        algorithmComboBox = new JComboBox<>(new String[]{"LZW", "LZ77", "Huffman", "Vector Quantization"});
+        algorithmComboBox = new JComboBox<>(new String[]{"LZW", "LZ77", "Huffman", "Vector Quantization" , "Predictive Coding"});
         compressRadioButton = new JRadioButton("Compress");
         decompressRadioButton = new JRadioButton("Decompress");
         ButtonGroup group = new ButtonGroup();
@@ -92,7 +92,6 @@ public class CompressionGUI {
                     }
                     return;
                 } else if(algorithm.equals("Vector Quantization")){
-                    // VectorQuantiz quantiz = new VectorQuantiz();
                     if (isCompress) {
                         try{
                             VectorQuantization.compressImg(inputFilePath, "src/compress.jpg", 4, 2);
@@ -108,6 +107,17 @@ public class CompressionGUI {
                             ex.printStackTrace();
                         }
                         
+                        statusLabel.setText("Decompression completed successfully.");
+                    }
+                    return;
+            } else if(algorithm.equals("Predictive Coding")){
+                    PredictiveCoding pc = new PredictiveCoding();
+                    if (isCompress) {
+                        pc.compress(inputFilePath, "src/compressed.bin");
+                        statusLabel.setText("Compression completed successfully.");
+                    } 
+                    else {
+                        pc.decompress(inputFilePath, "src/decompressed.jpg");
                         statusLabel.setText("Decompression completed successfully.");
                     }
                     return;
